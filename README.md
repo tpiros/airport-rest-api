@@ -5,6 +5,7 @@
 <ul><li>git clone to desired location.</li>
 <li>npm install</li>
 <li>node app.js</li>
+</ul>
 
 ## Import data to mongodb
 use mongoimport to import dataset from <b>data.json</b>
