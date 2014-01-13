@@ -1,54 +1,90 @@
 var dbconfig = require('../config/db')
 , _ = require('underscore')
-, acceptableParams = ['sort', 'order', 'fields'];
+, acceptableParams = ['sort', 'order', 'fields']
+, sort = false
+, handler = {};
 
-exports.all = function(req, res) {
-  var query = req.query
-  , keys = _.keys(query)
+function queryHandler(query) {
+  var q = query
+  , keys = _.keys(q)
   , sort = false
   , order = 1
   , sorting = {}
   , projection = {}
-  , tmp = '';
-  _.each(keys, function(k) {
-  if (_.contains((acceptableParams),k)) {
+  , tmp = '' //needed for sorts
+  , handler = {};
+
+  _.each(keys, function(k) { //for each key (k) in query
+    if (_.contains((acceptableParams), k)) {//if any of the keys are in acceptableParams
       if (k === "sort") {
         sort = true;
-        sorting[query[k]] = 1;
-        tmp = query[k];
+        sorting[q[k]] = 1;
+        tmp = q[k];
       }
       if (sort && k === "order") {
-        var option = query[k].toLowerCase();
-        if (option === "asc") sorting[tmp] = 1
-        if (option === "desc") sorting[tmp] = -1
+        var option = q[k].toLowerCase();
+        if (option === "asc") sorting[tmp] = 1;
+        if (option === "desc") sorting[tmp] = -1;
       }
-    if (k === "fields") {
-      var fields = query[k].split(',');
-      for (var i = 0; i<fields.length; i++) {
-        projection[fields[i]] = 1;
-        if (fields[i] !== "_id") {
-          projection["_id"] = 0;
+      handler.sort = sorting;
+      if (k === "fields") {
+        var fields = q[k].split(',');
+        for (var i = 0; i<fields.length; i++) {
+          fields[i] = fields[i].replace(/ /g,'');
+          projection[fields[i]] = 1;
+          if (fields[i] !== "_id") {
+            projection["_id"] = 0;
+          }
         }
+        handler.projection = projection;
       }
     }
-  }
-});
-if (sort) {
-  dbconfig.collection.find({}, projection).sort(sorting).toArray(function(err, airports){
-    res.json(airports);
   });
-} else {
-    dbconfig.collection.find({}, projection).toArray(function(err, airports){
+  return handler;
+}
+
+exports.all = function(req, res) {
+  var q = req.query;
+  if (!_.isEmpty(q)) {
+    handler = queryHandler(req.query);
+  }
+
+  if (_.has((handler), "projection") && _.has((handler), "sort")) {
+    dbconfig.collection.find({}, handler["projection"]).sort(handler["sort"]).toArray(function(err, airports){
+      res.json(airports);
+    });
+  } else if (_.has((handler), "projection")) {
+    dbconfig.collection.find({}, handler["projection"]).toArray(function(err, airports){
+      res.json(airports);
+    });
+  } else if (_.has((handler),"sort")) {
+    dbconfig.collection.find({}, {}).sort(handler["sort"]).toArray(function(err, airports){
+      res.json(airports);
+    });
+  } else {
+    dbconfig.collection.find({}, {}).toArray(function(err, airports){
       res.json(airports);
     });
   }
 }
 
 exports.airportIATA = function(req, res) {
-  iataCode = decodeURI(req.params.iata).toUpperCase();
-  dbconfig.collection.findOne({iata_code: iataCode}, function(err, airport){
-    res.json(airport);
-  });
+  var q = req.query;
+  var iataCode = decodeURI(req.params.iata).toUpperCase();
+
+  if (!_.isEmpty(q)) {
+    handler = queryHandler(req.query);
+  }
+  
+  if (_.has((handler), "projection")) {
+    dbconfig.collection.find({iata_code: iataCode}, handler["projection"]).toArray(function(err, airports){
+      res.json(airports);
+    });
+  } else {
+    dbconfig.collection.find({iata_code: iataCode}, {}).toArray(function(err, airports){
+      res.json(airports);
+    });
+  }
 }
 
 exports.airportType = function(req, res) {
@@ -59,47 +95,31 @@ exports.airportType = function(req, res) {
 }
 
 exports.airportDistance = function(req, res) {
-  var query = req.query
-  , keys = _.keys(query)
-  , sort = false
-  , order = 1
-  , sorting = {}
-  , projection = {}
-  , tmp = '';
-  _.each(keys, function(k) {
-  if (_.contains((acceptableParams),k)) {
-      if (k === "sort") {
-        sort = true;
-        sorting[query[k]] = 1;
-        tmp = query[k];
-      }
-      if (sort && k === "order") {
-        var option = query[k].toLowerCase();
-        if (option === "asc") sorting[tmp] = 1
-        if (option === "desc") sorting[tmp] = -1
-      }
-    if (k === "fields") {
-      var fields = query[k].split(',');
-      for (var i = 0; i<fields.length; i++) {
-        projection[fields[i]] = 1;
-        if (fields[i] !== "_id") {
-          projection["_id"] = 0;
-        }
-      }
-    }
-  }
-});
-  distance = decodeURI(req.params.distance);
+  var q = req.query;
+  var distance = decodeURI(req.params.distance);
+  distance = distance * 1000;
   var lat = parseFloat(req.query["lat"]);
   var lng = parseFloat(req.query["lng"]);
-  distance = distance * 1000;
-  var q = {'loc': { $near: { $geometry: { 'type': 'Point', 'coordinates': [lng, lat]}}, $maxDistance: distance}};
-  if (sort) {
-  dbconfig.collection.find(q, projection).sort(sorting).toArray(function(err, airports){
-    res.json(airports);
-  });
-} else {
-    dbconfig.collection.find(q, projection).toArray(function(err, airports){
+  var dbq = {'loc': { $near: { $geometry: { 'type': 'Point', 'coordinates': [lng, lat]}}, $maxDistance: distance}};
+
+  if (!_.isEmpty(q)) {
+    handler = queryHandler(req.query);
+  }
+  
+  if (_.has((handler), "projection") && _.has((handler), "sort")) {
+    dbconfig.collection.find(dbq, handler["projection"]).sort(handler["sort"]).toArray(function(err, airports){
+      res.json(airports);
+    });
+  } else if (_.has((handler), "projection")) {
+    dbconfig.collection.find(dbq, handler["projection"]).toArray(function(err, airports){
+      res.json(airports);
+    });
+  } else if (_.has((handler),"sort")) {
+    dbconfig.collection.find(dbq, {}).sort(handler["sort"]).toArray(function(err, airports){
+      res.json(airports);
+    });
+  } else {
+    dbconfig.collection.find(dbq, {}).toArray(function(err, airports){
       res.json(airports);
     });
   }
