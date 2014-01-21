@@ -5,7 +5,7 @@ var express = require('express')
 , api = require('./routes/api');
 
 app.configure(function() {
-  app.set('port', OPENSHIFT_NODEJS_PORT || 3000);
+  app.set('port', process.env.OPENSHIFT_NODEJS_PORT || 3000);
   app.use(express.bodyParser());
   app.use(app.router);
 });
