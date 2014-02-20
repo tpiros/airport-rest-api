@@ -1,6 +1,6 @@
 var dbconfig = require('../config/db')
 , _ = require('underscore')
-, acceptableParams = ['sort', 'order', 'fields']
+, acceptableParams = ['sort', 'order', 'fields', 'callback'];
 , sort = false
 , handler = {};
 
@@ -51,19 +51,19 @@ exports.all = function(req, res) {
 
   if (_.has((handler), "projection") && _.has((handler), "sort")) {
     dbconfig.collection.find({}, handler["projection"]).sort(handler["sort"]).toArray(function(err, airports){
-      res.json(airports);
+      res.jsonp(airports);
     });
   } else if (_.has((handler), "projection")) {
     dbconfig.collection.find({}, handler["projection"]).toArray(function(err, airports){
-      res.json(airports);
+      res.jsonp(airports);
     });
   } else if (_.has((handler),"sort")) {
     dbconfig.collection.find({}, {}).sort(handler["sort"]).toArray(function(err, airports){
-      res.json(airports);
+      res.jsonp(airports);
     });
   } else {
     dbconfig.collection.find({}, {}).toArray(function(err, airports){
-      res.json(airports);
+      res.jsonp(airports);
     });
   }
 }
@@ -78,11 +78,11 @@ exports.airportIATA = function(req, res) {
   
   if (_.has((handler), "projection")) {
     dbconfig.collection.find({iata_code: iataCode}, handler["projection"]).toArray(function(err, airports){
-      res.json(airports);
+      res.jsonp(airports);
     });
   } else {
     dbconfig.collection.find({iata_code: iataCode}, {}).toArray(function(err, airports){
-      res.json(airports);
+      res.jsonp(airports);
     });
   }
 }
@@ -90,7 +90,7 @@ exports.airportIATA = function(req, res) {
 exports.airportType = function(req, res) {
   airporttype = decodeURI(req.params.airporttype);
   dbconfig.collection.find({ airport_type: airporttype }).toArray(function(err, airports){
-    res.json(airports);
+    res.jsonp(airports);
   });
 }
 
@@ -108,19 +108,19 @@ exports.airportDistance = function(req, res) {
   
   if (_.has((handler), "projection") && _.has((handler), "sort")) {
     dbconfig.collection.find(dbq, handler["projection"]).sort(handler["sort"]).toArray(function(err, airports){
-      res.json(airports);
+      res.jsonp(airports);
     });
   } else if (_.has((handler), "projection")) {
     dbconfig.collection.find(dbq, handler["projection"]).toArray(function(err, airports){
-      res.json(airports);
+      res.jsonp(airports);
     });
   } else if (_.has((handler),"sort")) {
     dbconfig.collection.find(dbq, {}).sort(handler["sort"]).toArray(function(err, airports){
-      res.json(airports);
+      res.jsonp(airports);
     });
   } else {
     dbconfig.collection.find(dbq, {}).toArray(function(err, airports){
-      res.json(airports);
+      res.jsonp(airports);
     });
   }
 }
