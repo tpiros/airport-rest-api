@@ -1,6 +1,6 @@
 var dbconfig = require('../config/db')
 , _ = require('underscore')
-, acceptableParams = ['sort', 'order', 'fields', 'callback'];
+, acceptableParams = ['sort', 'order', 'fields', 'callback']
 , sort = false
 , handler = {};
 
