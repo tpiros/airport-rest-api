@@ -1,6 +1,6 @@
 //openshift
 if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD) {
-    //var mongo = env['mongodb2-2.4.8'][0]['credentials']; 
+    //var mongo = env['mongodb2-2.4.8'][0]['credentials'];
     var host = process.env.OPENSHIFT_MONGODB_DB_HOST;
     var port = process.env.OPENSHIFT_MONGODB_DB_PORT;
     var db = "airportrestapi";
@@ -12,7 +12,7 @@ else {
     var port = 27017;
     var username;
     var password ;
-    var db = 'servicenow';
+    var db = 'airportdb';
 }
 var mongodb = require('mongodb');
 module.exports.init = function (cb) {
