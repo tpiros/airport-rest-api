@@ -18,6 +18,7 @@ dbconfig.init(function (error) {
 
 router.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', 'http://null.jsbin.com');
+  res.header('Access-Control-Allow-Origin', 'http://localhost:*');
   next();
 });
 
