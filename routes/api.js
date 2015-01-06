@@ -1,18 +1,18 @@
-var dbconfig = require('../config/db')
-, _ = require('underscore')
-, acceptableParams = ['sort', 'order', 'fields', 'callback']
-, sort = false
-, handler = {};
+var dbconfig         = require('../config/db');
+var _                = require('underscore');
+var acceptableParams = ['sort', 'order', 'fields', 'callback'];
+var sort             = false;
+var handler          = {};
 
 function queryHandler(query) {
-  var q = query
-  , keys = _.keys(q)
-  , sort = false
-  , order = 1
-  , sorting = {}
-  , projection = {}
-  , tmp = '' //needed for sorts
-  , handler = {};
+  var q          = query;
+  var keys       = _.keys(q);
+  var sort       = false;
+  var order      = 1;
+  var sorting    = {};
+  var projection = {};
+  var tmp        = '';
+  var handler    = {};
 
   _.each(keys, function(k) { //for each key (k) in query
     if (_.contains((acceptableParams), k)) {//if any of the keys are in acceptableParams
@@ -44,6 +44,7 @@ function queryHandler(query) {
 }
 
 exports.all = function(req, res) {
+  console.log('all is called');
   var q = req.query;
   if (!_.isEmpty(q)) {
     handler = queryHandler(req.query);
@@ -75,7 +76,7 @@ exports.airportIATA = function(req, res) {
   if (!_.isEmpty(q)) {
     handler = queryHandler(req.query);
   }
-  
+
   if (_.has((handler), "projection")) {
     dbconfig.collection.find({iata_code: iataCode}, handler["projection"]).toArray(function(err, airports){
       res.jsonp(airports);
@@ -105,7 +106,7 @@ exports.airportDistance = function(req, res) {
   if (!_.isEmpty(q)) {
     handler = queryHandler(req.query);
   }
-  
+
   if (_.has((handler), "projection") && _.has((handler), "sort")) {
     dbconfig.collection.find(dbq, handler["projection"]).sort(handler["sort"]).toArray(function(err, airports){
       res.jsonp(airports);

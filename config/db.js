@@ -5,14 +5,14 @@ if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD) {
     var port = process.env.OPENSHIFT_MONGODB_DB_PORT;
     var db = "airportapi";
     var username = process.env.OPENSHIFT_MONGODB_DB_USERNAME;
-    var password = process.env.OPENSHIFT_MONGODB_DB_PASSWORD;;
+    var password = process.env.OPENSHIFT_MONGODB_DB_PASSWORD;
 }
 else {
     var host = 'localhost';
     var port = 27017;
     var username;
     var password ;
-    var db = 'airportdb';
+    var db = 'airportapi';
 }
 var mongodb = require('mongodb');
 module.exports.init = function (cb) {
