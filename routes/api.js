@@ -26,7 +26,7 @@ function queryHandler(query) {
         if (option === "asc") sorting[tmp] = 1;
         if (option === "desc") sorting[tmp] = -1;
       }
-      handler.sort = sorting;
+      handler.sort = sorting; 
       if (k === "fields") {
         var fields = q[k].split(',');
         for (var i = 0; i<fields.length; i++) {
